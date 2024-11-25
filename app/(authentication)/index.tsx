@@ -1,46 +1,73 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import React from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { Link } from 'expo-router'
+type FormData = {
+  email: string;
+  password: string;
+};
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
+  const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const onSubmit: SubmitHandler<FormData> = (data) => {
+    const { email, password } = data;
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
-      return;
+    } else {
+      Alert.alert('Success', `Logged in with Email: ${email}`);
     }
-    Alert.alert('Success', `Logged in with Email: ${email}`);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
+        <Controller
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              style={[styles.input, errors.email && { borderColor: 'red' }]}
+              placeholder="Email"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          )}
+          name="email"
+          rules={{
+            required: 'Email is required',
+            pattern: {
+              value: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
+              message: 'Invalid email address',
+            },
+          }}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
+
+        <Controller
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              style={[styles.input, errors.password && { borderColor: 'red' }]}
+              placeholder="Password"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              secureTextEntry
+            />
+          )}
+          name="password"
+          rules={{
+            required: 'Password is required',
+            minLength: {
+              value: 6,
+              message: 'Password must be at least 6 characters long',
+            },
+          }}
         />
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <View style={styles.links}>
@@ -49,11 +76,12 @@ const Login = () => {
           onPress={() => Alert.alert('Navigate', 'Forgot Password Screen')}>
           Forgot Password?
         </Text>
-        <Text
+        <Link
+          href={"/signup"}
           style={[styles.linkText, { marginTop: 10 }]}
-          onPress={() => Alert.alert('Navigate', 'Sign Up Screen')}>
+        >
           Don’t have an account? Sign up
-        </Text>
+        </Link>
       </View>
     </View>
   );
@@ -109,6 +137,11 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontSize: 14,
     textDecorationLine: 'underline',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5,
   },
 });
 

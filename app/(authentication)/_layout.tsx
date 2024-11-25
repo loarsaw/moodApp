@@ -18,14 +18,20 @@ export default function StackLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Login',
+        }}
+      />
+      <Stack.Screen
+        name="otp"
+        options={{
+          title: 'OTP',
         }}
       />
       {/* Explore Screen */}
       <Stack.Screen
-        name="explore"
+        name="signup"
         options={{
-          title: 'Explore',
+          title: 'SignUp',
         }}
       />
     </Stack>

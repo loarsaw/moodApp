@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-
+import { Link } from 'expo-router'
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,11 +64,12 @@ const Signup = () => {
       </TouchableOpacity>
       {/* Link to Login */}
       <View style={styles.links}>
-        <Text
+        <Link
           style={[styles.linkText, { marginTop: 10 }]}
-          onPress={() => Alert.alert('Navigate', 'Login Screen')}>
+          href={"/"}
+        >
           Already have an account? Login
-        </Text>
+        </Link>
       </View>
     </View>
   );
