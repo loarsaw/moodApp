@@ -1,17 +1,18 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Redirect, router } from 'expo-router';
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Button,
-  Image,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Image, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+const schema = yup.object({
+  firstName: yup.string().required('First name is required'),
+  lastName: yup.string().required('Last name is required'),
+  email: yup.string().email('Invalid email address').required('Email is required'),
+  phone: yup.string().matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number').required('Phone number is required'),
+  quizzesAttempted: yup.number().min(0, 'Quizzes attempted must be a positive number').required('This field is required'),
+  dateOfJoining: yup.string().required('Date of joining is required'),
+  avatar: yup.string().url('Invalid avatar URL').required('Avatar URL is required'),
+}).required();
 
 type AccountDetails = {
   firstName: string;
@@ -24,27 +25,28 @@ type AccountDetails = {
 };
 
 const AccountPage: React.FC = () => {
-  const [accountDetails, setAccountDetails] = useState<AccountDetails>({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1234567890',
-    quizzesAttempted: 15,
-    dateOfJoining: '2024-01-01',
-    avatar: 'https://via.placeholder.com/100',
+  const { control, handleSubmit, formState: { errors }, setValue } = useForm<AccountDetails>({
+    resolver: yupResolver(schema),  
+    defaultValues: {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      phone: '+1234567890',
+      quizzesAttempted: 15,
+      dateOfJoining: '2024-01-01',
+      avatar: 'https://via.placeholder.com/100',
+    },
   });
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [newAvatar, setNewAvatar] = useState<string>(accountDetails.avatar);
-  const [token, setToken] = useState<string | null>(null); // Assuming token is a string or null
-
-  // if (token == null) {
-  //   router.push("/signin");
-  // }
+  const [newAvatar, setNewAvatar] = useState<string>('https://via.placeholder.com/100');
 
   const handleSaveAvatar = () => {
-    setAccountDetails((prev) => ({ ...prev, avatar: newAvatar }));
+    setValue('avatar', newAvatar);
     setIsModalVisible(false);
+  };
+
+  const onSubmit = (data: AccountDetails) => {
   };
 
   return (
@@ -53,49 +55,127 @@ const AccountPage: React.FC = () => {
         <Text style={styles.title}>Account Details</Text>
 
         <View style={styles.avatarContainer}>
-          <Image source={{ uri: accountDetails.avatar }} style={styles.avatar} />
-          <TouchableOpacity
-            style={styles.editAvatarButton}
-            onPress={() => {
-              AsyncStorage.setItem("new", "kaskakjs");
-              setIsModalVisible(true);
-            }}
-          >
+          <Image source={{ uri: newAvatar }} style={styles.avatar} />
+          <TouchableOpacity style={styles.editAvatarButton} onPress={() => setIsModalVisible(true)}>
             <Text style={styles.editAvatarText}>Edit Avatar</Text>
           </TouchableOpacity>
         </View>
 
+        {/* First Name */}
         <View style={styles.detailContainer}>
           <Text style={styles.label}>First Name:</Text>
-          <TextInput
-            style={styles.input}
-            value={accountDetails.firstName}
-            onChangeText={(text) =>
-              setAccountDetails((prev) => ({ ...prev, firstName: text }))
-            }
+          <Controller
+            control={control}
+            name="firstName"
+            render={({ field: { value, onChange } }) => (
+              <>
+                <TextInput
+                  style={[styles.input, errors.firstName && styles.inputError]} // Apply error style if invalid
+                  value={value}
+                  onChangeText={onChange}
+                />
+                {errors.firstName && <Text style={styles.errorText}>{errors.firstName.message}</Text>}
+              </>
+            )}
+          />
+        </View>
+
+        {/* Last Name */}
+        <View style={styles.detailContainer}>
+          <Text style={styles.label}>Last Name:</Text>
+          <Controller
+            control={control}
+            name="lastName"
+            render={({ field: { value, onChange } }) => (
+              <>
+                <TextInput
+                  style={[styles.input, errors.lastName && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                />
+                {errors.lastName && <Text style={styles.errorText}>{errors.lastName.message}</Text>}
+              </>
+            )}
+          />
+        </View>
+
+        {/* Email */}
+        <View style={styles.detailContainer}>
+          <Text style={styles.label}>Email:</Text>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { value, onChange } }) => (
+              <>
+                <TextInput
+                  style={[styles.input, errors.email && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                />
+                {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+              </>
+            )}
           />
         </View>
 
         <View style={styles.detailContainer}>
-          <Text style={styles.label}>Last Name:</Text>
-          <TextInput
-            style={styles.input}
-            value={accountDetails.lastName}
-            onChangeText={(text) =>
-              setAccountDetails((prev) => ({ ...prev, lastName: text }))
-            }
+          <Text style={styles.label}>Phone Number:</Text>
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field: { value, onChange } }) => (
+              <>
+                <TextInput
+                  style={[styles.input, errors.phone && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                />
+                {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+              </>
+            )}
           />
         </View>
 
+        <View style={styles.detailContainer}>
+          <Text style={styles.label}>Total Quizzes Attempted:</Text>
+          <Controller
+            control={control}
+            name="quizzesAttempted"
+            render={({ field: { value, onChange } }) => (
+              <>
+                <TextInput
+                  style={[styles.input, errors.quizzesAttempted && styles.inputError]}
+                  keyboardType="numeric"
+                  value={value?.toString()}
+                  onChangeText={(text) => onChange(Number(text))}
+                />
+                {errors.quizzesAttempted && <Text style={styles.errorText}>{errors.quizzesAttempted.message}</Text>}
+              </>
+            )}
+          />
+        </View>
 
-        <Button title="Save Changes" onPress={() => alert('Changes saved!')} />
+        <View style={styles.detailContainer}>
+          <Text style={styles.label}>Date of Joining:</Text>
+          <Controller
+            control={control}
+            name="dateOfJoining"
+            render={({ field: { value, onChange } }) => (
+              <>
+                <TextInput
+                  style={[styles.input, errors.dateOfJoining && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                />
+                {errors.dateOfJoining && <Text style={styles.errorText}>{errors.dateOfJoining.message}</Text>}
+              </>
+            )}
+          />
+        </View>
 
-        <Modal
-          visible={isModalVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setIsModalVisible(false)}
-        >
+        <Button title="Save Changes" onPress={handleSubmit(onSubmit)} />
+
+        <Modal visible={isModalVisible} transparent={true} animationType="slide" onRequestClose={() => setIsModalVisible(false)}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Edit Avatar</Text>
@@ -116,7 +196,6 @@ const AccountPage: React.FC = () => {
     </ScrollView>
   );
 };
-
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -170,6 +249,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#fff',
   },
+  inputError: {
+    borderColor: 'red',
+  },
   value: {
     fontSize: 16,
     color: '#333',
@@ -197,6 +279,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     marginTop: 20,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
 });
 

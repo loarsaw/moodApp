@@ -1,7 +1,10 @@
 import CountdownTimer from '@/components/ui/Timer';
+import { addToHistory } from '@/redux/historySlice/slice';
+import { RootState } from '@/redux/store';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 type QuizQuestion = {
   question: string;
@@ -10,32 +13,33 @@ type QuizQuestion = {
 };
 
 type Answers = Record<number, string>;
-const quizQuestions: QuizQuestion[] = [
-  {
-    question: 'What is the capital of France?',
-    options: ['Paris', 'London', 'Berlin', 'Madrid'],
-    correctAnswer: 'Paris',
-  },
-  {
-    question: 'Which planet is known as the Red Planet?',
-    options: ['Earth', 'Mars', 'Jupiter', 'Venus'],
-    correctAnswer: 'Mars',
-  },
-  {
-    question: 'What is the largest ocean on Earth?',
-    options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'],
-    correctAnswer: 'Pacific',
-  },
-];
+// const quizQuestions: QuizQuestion[] = [
+//   {
+//     question: 'What is the capital of France?',
+//     options: ['Paris', 'London', 'Berlin', 'Madrid'],
+//     correctAnswer: 'Paris',
+//   },
+//   {
+//     question: 'Which planet is known as the Red Planet?',
+//     options: ['Earth', 'Mars', 'Jupiter', 'Venus'],
+//     correctAnswer: 'Mars',
+//   },
+//   {
+//     question: 'What is the largest ocean on Earth?',
+//     options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'],
+//     correctAnswer: 'Pacific',
+//   },
+// ];
 
 const HomePage: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [answers, setAnswers] = useState<Answers>({});
+  const { questions } = useSelector((state: RootState) => state.questions)
   const [secondsLeft, setSecondsLeft] = useState(60);
   const [isRunning, setIsRunning] = useState(true);
-  const currentQuestion = quizQuestions[currentQuestionIndex];
-
+  const currentQuestion = questions[currentQuestionIndex];
+  const dispatch = useDispatch()
   const handleNext = () => {
     if (selectedOption) {
       setAnswers((prev) => ({
@@ -64,11 +68,12 @@ const HomePage: React.FC = () => {
   }, [secondsLeft])
   const handleSubmit = () => {
     let score = 0;
-    quizQuestions.forEach((question, index) => {
+    questions.forEach((question, index) => {
       if (answers[index] === question.correctAnswer) {
         score += 1;
       }
     });
+    dispatch(addToHistory({ attemptedOn: new Date().toDateString(), id: "1", questions: questions, score: score }))
     router.push("/(history)/list")
   };
 
@@ -102,7 +107,7 @@ const HomePage: React.FC = () => {
           <Text style={styles.navButtonText}>Back</Text>
         </TouchableOpacity>
 
-        {currentQuestionIndex === quizQuestions.length - 1 ? (
+        {currentQuestionIndex === questions.length - 1 ? (
           <TouchableOpacity style={styles.navButton} onPress={handleSubmit}>
             <Text style={styles.navButtonText}>Submit</Text>
           </TouchableOpacity>

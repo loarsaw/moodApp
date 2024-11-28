@@ -1,43 +1,29 @@
+import { RootState } from '@/redux/store';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import { useSelector } from 'react-redux';
 
-type QuizHistoryItem = {
+type quesString = {
+  question: string; options: string[]; correctAnswer: string;
+}
+
+type HistoryItem = {
   id: string;
-  date: string;
-  score: string;
-  avatar: string;
+  questions: quesString[],
+  score: number,
+  attemptedOn: string;
 };
 
 const QuizHistory: React.FC = () => {
-  const [history, setHistory] = useState<QuizHistoryItem[]>([
-    {
-      id: '1',
-      date: '2024-11-25',
-      score: '8/10',
-      avatar: 'https://via.placeholder.com/50',
-    },
-    {
-      id: '2',
-      date: '2024-11-26',
-      score: '7/10',
-      avatar: 'https://via.placeholder.com/50',
-    },
-    {
-      id: '3',
-      date: '2024-11-27',
-      score: '9/10',
-      avatar: 'https://via.placeholder.com/50',
-    },
-  ]);
+  const { history } = useSelector((state: RootState) => state.history)
 
-  const renderItem = ({ item }: { item: QuizHistoryItem }) => (
+  const renderItem = ({ item }: { item: HistoryItem }) => (
     <View style={styles.itemContainer}>
-      {/* Avatar */}
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      {/* <Image source={{ uri: item.avatar }} style={styles.avatar} /> */}
 
-      {/* Date and Score */}
+      {/* attemptedOn and Score */}
       <View style={styles.textContainer}>
-        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.attemptedOn}>{item.attemptedOn}</Text>
         <Text style={styles.score}>Score: {item.score}</Text>
       </View>
     </View>
@@ -46,11 +32,14 @@ const QuizHistory: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Quiz History</Text>
-      <FlatList
-        data={history}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
+      {history.length == 0 ? <Text>No Attempted Quiz</Text> : (
+
+        <FlatList
+          data={history}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+        />
+      )}
     </View>
   );
 };
@@ -89,7 +78,7 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
   },
-  date: {
+  attemptedOn: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
