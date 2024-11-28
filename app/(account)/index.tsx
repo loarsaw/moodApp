@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Image, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { getItem, setItem } from '@/utils/asyncStorage';
+import { router } from 'expo-router';
 
 const schema = yup.object({
   firstName: yup.string().required('First name is required'),
@@ -26,7 +28,7 @@ type AccountDetails = {
 
 const AccountPage: React.FC = () => {
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<AccountDetails>({
-    resolver: yupResolver(schema),  
+    resolver: yupResolver(schema),
     defaultValues: {
       firstName: 'John',
       lastName: 'Doe',
@@ -46,8 +48,20 @@ const AccountPage: React.FC = () => {
     setIsModalVisible(false);
   };
 
-  const onSubmit = (data: AccountDetails) => {
+  const onSubmit = async (data: AccountDetails) => {
+
   };
+  useEffect(() => {
+    getToken()
+  }, [])
+
+  async function getToken() {
+    const gotItem = await getItem("token");
+    console.log(gotItem)
+    if (gotItem == null) {
+      router.push("/signin")
+    }
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>

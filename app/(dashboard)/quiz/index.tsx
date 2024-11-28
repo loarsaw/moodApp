@@ -3,7 +3,7 @@ import { addToHistory } from '@/redux/historySlice/slice';
 import { RootState } from '@/redux/store';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 type QuizQuestion = {
@@ -13,33 +13,17 @@ type QuizQuestion = {
 };
 
 type Answers = Record<number, string>;
-// const quizQuestions: QuizQuestion[] = [
-//   {
-//     question: 'What is the capital of France?',
-//     options: ['Paris', 'London', 'Berlin', 'Madrid'],
-//     correctAnswer: 'Paris',
-//   },
-//   {
-//     question: 'Which planet is known as the Red Planet?',
-//     options: ['Earth', 'Mars', 'Jupiter', 'Venus'],
-//     correctAnswer: 'Mars',
-//   },
-//   {
-//     question: 'What is the largest ocean on Earth?',
-//     options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'],
-//     correctAnswer: 'Pacific',
-//   },
-// ];
 
 const HomePage: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [answers, setAnswers] = useState<Answers>({});
-  const { questions } = useSelector((state: RootState) => state.questions)
+  const { questions } = useSelector((state: RootState) => state.questions);
   const [secondsLeft, setSecondsLeft] = useState(60);
   const [isRunning, setIsRunning] = useState(true);
   const currentQuestion = questions[currentQuestionIndex];
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+
   const handleNext = () => {
     if (selectedOption) {
       setAnswers((prev) => ({
@@ -59,13 +43,14 @@ const HomePage: React.FC = () => {
       setCurrentQuestionIndex((prev) => prev - 1);
     }
   };
-  // to push to list screen when time is over
-  useEffect(() => {
-    if (secondsLeft == 0) {
-      router.push("/(history)/list")
 
+  // Navigate to the history list page when time is over
+  useEffect(() => {
+    if (secondsLeft === 0) {
+      router.push("/(history)/list");
     }
-  }, [secondsLeft])
+  }, [secondsLeft]);
+
   const handleSubmit = () => {
     let score = 0;
     questions.forEach((question, index) => {
@@ -73,16 +58,24 @@ const HomePage: React.FC = () => {
         score += 1;
       }
     });
-    dispatch(addToHistory({ attemptedOn: new Date().toDateString(), id: "1", questions: questions, score: score }))
-    router.push("/(history)/list")
+    dispatch(addToHistory({
+      attemptedOn: new Date().toDateString(),
+      id: "1",
+      questions: questions,
+      score: score,
+    }));
+    router.push("/(history)/list");
   };
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.title}>Quizzzz APP</Text> */}
-      <View><CountdownTimer isRunning={isRunning} secondsLeft={secondsLeft} setSecondsLeft={setSecondsLeft} /></View>
+      {/* Countdown Timer */}
+      <CountdownTimer isRunning={isRunning} secondsLeft={secondsLeft} setSecondsLeft={setSecondsLeft} />
+
+      {/* Current Question */}
       <Text style={styles.question}>{currentQuestion.question}</Text>
 
+      {/* Options */}
       <View style={styles.optionsContainer}>
         {currentQuestion.options.map((option, index) => (
           <TouchableOpacity
@@ -98,6 +91,7 @@ const HomePage: React.FC = () => {
         ))}
       </View>
 
+      {/* Navigation Buttons */}
       <View style={styles.navigationContainer}>
         <TouchableOpacity
           style={[styles.navButton, currentQuestionIndex === 0 && styles.disabledButton]}
@@ -127,57 +121,68 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#E9F7F1',
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#2A2A2A',
   },
   question: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 30,
+    color: '#1A73E8',
     textAlign: 'center',
+    paddingHorizontal: 20,
+    lineHeight: 32,
   },
   optionsContainer: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 40,
   },
   optionButton: {
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
+    backgroundColor: '#ffffff',
+    borderColor: '#DDD',
     borderWidth: 1,
     borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
+    paddingVertical: 15,
+    marginBottom: 15,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
   },
   selectedOption: {
-    backgroundColor: '#007BFF',
-    borderColor: '#0056b3',
+    backgroundColor: '#4CAF50',
+    borderColor: '#388E3C',
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#333',
   },
   navigationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+    paddingHorizontal: 20,
   },
   navButton: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 10,
+    backgroundColor: '#FF5722',
+    paddingVertical: 12,
     paddingHorizontal: 30,
-    borderRadius: 10,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#BDBDBD',
   },
   navButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#ffffff',
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });
