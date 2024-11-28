@@ -27,6 +27,7 @@ type AccountDetails = {
 };
 
 const AccountPage: React.FC = () => {
+
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<AccountDetails>({
     resolver: yupResolver(schema),
     defaultValues: {

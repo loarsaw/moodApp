@@ -2,15 +2,9 @@ import CountdownTimer from '@/components/ui/Timer';
 import { addToHistory } from '@/redux/historySlice/slice';
 import { RootState } from '@/redux/store';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-
-type QuizQuestion = {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-};
 
 type Answers = Record<number, string>;
 
@@ -24,7 +18,7 @@ const HomePage: React.FC = () => {
   const currentQuestion = questions[currentQuestionIndex];
   const dispatch = useDispatch();
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (selectedOption) {
       setAnswers((prev) => ({
         ...prev,
@@ -35,23 +29,22 @@ const HomePage: React.FC = () => {
     } else {
       Alert.alert('Please select an option before proceeding.');
     }
-  };
+  }, [currentQuestionIndex, selectedOption]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (currentQuestionIndex > 0) {
       setSelectedOption(answers[currentQuestionIndex - 1] || '');
       setCurrentQuestionIndex((prev) => prev - 1);
     }
-  };
+  }, [currentQuestionIndex, selectedOption]);
 
-  // Navigate to the history list page when time is over
   useEffect(() => {
     if (secondsLeft === 0) {
       router.push("/(history)/list");
     }
   }, [secondsLeft]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     let score = 0;
     questions.forEach((question, index) => {
       if (answers[index] === question.correctAnswer) {
@@ -65,11 +58,16 @@ const HomePage: React.FC = () => {
       score: score,
     }));
     router.push("/(history)/list");
-  };
+  }, [questions])
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Countdown Timer */}
+      {/* Timer will cause the re rendering of the entire questions sections on every second
+      possible solution
+      1. useMemo or React.memo for
+      2. ReStructure
+      */}
       <CountdownTimer isRunning={isRunning} secondsLeft={secondsLeft} setSecondsLeft={setSecondsLeft} />
 
       {/* Current Question */}
