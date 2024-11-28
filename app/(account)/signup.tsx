@@ -1,7 +1,11 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, Image } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { Link } from 'expo-router';
+// @ts-ignore
+import backImage from '../../assets/images/background.png';
+import { router } from 'expo-router';
+import axiosInstance from '@/utils/axiosInstance';
 
 type FormData = {
   email: string;
@@ -19,94 +23,104 @@ const Signup = () => {
 
   const password = watch('password');
 
-  const onSubmit = (data: FormData) => {
-    Alert.alert('Success', `Account created for Email: ${data.email}`);
+  const onSubmit = async (data: FormData) => {
+    // await axiosInstance.post("/sign-up", { email: data.email, password: data.password }).then(() => {
+    //   console.log("request sent")
+    // })
+
+    router.push("/otp");
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
-      <View style={styles.inputContainer}>
-        <Controller
-          control={control}
-          name="email"
-          rules={{
-            required: 'Email is required',
-            pattern: {
-              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-              message: 'Enter a valid email',
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={[styles.input, errors.email && styles.inputError]}
-                placeholder="Email"
-                value={value}
-                onChangeText={onChange}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
-            </View>
-          )}
-        />
+      <Image source={backImage} style={styles.backImage} />
 
-        <Controller
-          control={control}
-          name="password"
-          rules={{
-            required: 'Password is required',
-            minLength: { value: 6, message: 'Password must be at least 6 characters' },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={[styles.input, errors.password && styles.inputError]}
-                placeholder="Password"
-                value={value}
-                onChangeText={onChange}
-                secureTextEntry
-              />
-              {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
-            </View>
-          )}
-        />
+      <SafeAreaView style={styles.form}>
+        <Text style={styles.title}>Sign Up</Text>
 
-        <Controller
-          control={control}
-          name="confirmPassword"
-          rules={{
-            required: 'Confirm Password is required',
-            validate: (value) =>
-              value === password || 'Passwords must match', // Real-time password match validation
-          }}
-          render={({ field: { onChange, value } }) => (
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={[styles.input, errors.confirmPassword && styles.inputError]}
-                placeholder="Confirm Password"
-                value={value}
-                onChangeText={onChange}
-                secureTextEntry
-              />
-              {errors.confirmPassword && (
-                <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
-              )}
-            </View>
-          )}
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Controller
+            control={control}
+            name="email"
+            rules={{
+              required: 'Email is required',
+              pattern: {
+                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                message: 'Enter a valid email',
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={[styles.input, errors.email && styles.inputError]}
+                  placeholder="Email"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+              </View>
+            )}
+          />
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+          <Controller
+            control={control}
+            name="password"
+            rules={{
+              required: 'Password is required',
+              minLength: { value: 6, message: 'Password must be at least 6 characters' },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={[styles.input, errors.password && styles.inputError]}
+                  placeholder="Password"
+                  value={value}
+                  onChangeText={onChange}
+                  secureTextEntry
+                />
+                {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+              </View>
+            )}
+          />
 
-      <View style={styles.links}>
-        <Link style={[styles.linkText, { marginTop: 10 }]} href="/">
-          Already have an account? Login
-        </Link>
-      </View>
+          <Controller
+            control={control}
+            name="confirmPassword"
+            rules={{
+              required: 'Confirm Password is required',
+              validate: (value) =>
+                value === password || 'Passwords must match',
+            }}
+            render={({ field: { onChange, value } }) => (
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={[styles.input, errors.confirmPassword && styles.inputError]}
+                  placeholder="Confirm Password"
+                  value={value}
+                  onChangeText={onChange}
+                  secureTextEntry
+                />
+                {errors.confirmPassword && (
+                  <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+                )}
+              </View>
+            )}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
+          <Text style={styles.buttonText}>Sign Up</Text>
+        </TouchableOpacity>
+
+        <View style={styles.links}>
+          <Link style={[styles.linkText, { marginTop: 10 }]} href="/">
+            Already have an account? Login
+          </Link>
+        </View>
+      </SafeAreaView>
+      <StatusBar barStyle="light-content" />
     </View>
   );
 };
@@ -114,33 +128,37 @@ const Signup = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    padding: 20,
+    backgroundColor: '#fff',
+    position: 'relative',
+  },
+  backImage: {
+    width: '100%',
+    height: 140,
+    position: 'absolute',
+    top: 0,
+    resizeMode: 'cover',
   },
   title: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#343a40',
+    color: 'black',
+    alignSelf: 'center',
+    paddingTop: 28,
   },
   inputContainer: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   inputWrapper: {
     marginBottom: 10,
   },
   input: {
-    width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ced4da',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#F6F7FB',
+    height: 58,
+    marginBottom: 20,
     fontSize: 16,
+    borderRadius: 10,
+    padding: 12,
   },
   inputError: {
     borderColor: '#e74c3c',
@@ -151,18 +169,17 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   button: {
-    width: '100%',
-    height: 50,
     backgroundColor: '#28a745',
-    borderRadius: 8,
+    height: 58,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginTop: 40,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
+    color: 'white',
+    fontSize: 18,
   },
   links: {
     alignItems: 'center',
@@ -171,6 +188,12 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontSize: 14,
     textDecorationLine: 'underline',
+  },
+  form: {
+    flex: 1,
+    justifyContent: 'center',
+    marginHorizontal: 30,
+    marginTop: 50,
   },
 });
 

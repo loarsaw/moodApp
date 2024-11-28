@@ -3,7 +3,7 @@ import { addToHistory } from '@/redux/historySlice/slice';
 import { RootState } from '@/redux/store';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 type QuizQuestion = {
@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {/* Countdown Timer */}
       <CountdownTimer isRunning={isRunning} secondsLeft={secondsLeft} setSecondsLeft={setSecondsLeft} />
 
@@ -111,13 +111,13 @@ const HomePage: React.FC = () => {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
