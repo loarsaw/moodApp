@@ -7,18 +7,11 @@ export default function StackLayout() {
         <Stack
         >
             <Stack.Screen
-                name="home"
+                name="list"
                 options={{
                     headerShown: false
                 }}
             />
-            <Stack.Screen
-                name="quiz"
-                options={{
-                    headerShown: false
-                }}
-            />
-
         </Stack>
     );
 }

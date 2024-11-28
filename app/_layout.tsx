@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, Link } from 'expo-router';
+import { Tabs } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -8,8 +8,8 @@ import 'react-native-reanimated';
 import { Provider as StoreProvider } from 'react-redux'
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { store } from '@/redux/store';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -31,12 +31,38 @@ export default function RootLayout() {
   return (
     <StoreProvider store={store}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(dashboard)" options={{ headerShown: false }} />
-          <Stack.Screen name="(authentication)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        <Tabs>
+          <Tabs.Screen
+            options={{
+              headerShown: false,
+              title: "Home",
+              tabBarIcon: ({ color }) => <MaterialIcons size={28} name="home-filled" color={color} />
+            }}
+            name="(dashboard)" />
+
+          <Tabs.Screen
+            options={{
+              href: null,
+            }}
+            name="index" />
+          <Tabs.Screen
+            options={{
+              headerShown: false,
+              title: "History",
+              tabBarIcon: ({ color }) => <MaterialIcons size={28} name="list" color={color} />
+            }}
+            name="(history)" />
+          <Tabs.Screen
+            options={{
+              headerShown: false,
+              title: "Account",
+              tabBarIcon: ({ color }) => <MaterialIcons size={28} name="verified-user" color={color} />
+
+            }}
+            name="(account)" />
+
+
+        </Tabs>
         <StatusBar style="auto" />
       </ThemeProvider>
     </StoreProvider>
