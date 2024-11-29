@@ -29,22 +29,22 @@ const HomePage: React.FC = () => {
     } else {
       Alert.alert('Please select an option before proceeding.');
     }
-  }, [currentQuestionIndex, selectedOption]);
+  }, [currentQuestionIndex, selectedOption, answers]);
 
   const handleBack = useCallback(() => {
     if (currentQuestionIndex > 0) {
       setSelectedOption(answers[currentQuestionIndex - 1] || '');
       setCurrentQuestionIndex((prev) => prev - 1);
     }
-  }, [currentQuestionIndex, selectedOption]);
+  }, [currentQuestionIndex, selectedOption, answers]);
 
   useEffect(() => {
     if (secondsLeft === 0) {
-      router.push("/(history)/list");
+      router.push("/(history)");
     }
   }, [secondsLeft]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     let score = 0;
     questions.forEach((question, index) => {
       if (answers[index] === question.correctAnswer) {
@@ -57,8 +57,9 @@ const HomePage: React.FC = () => {
       questions: questions,
       score: score,
     }));
-    router.push("/(history)/list");
-  }, [questions])
+    router.push("/(history)");
+  }
+    // }, [questions, answers])
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

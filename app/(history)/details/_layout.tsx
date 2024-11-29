@@ -7,7 +7,7 @@ export default function StackLayout() {
         <Stack
         >
             <Stack.Screen
-                name="index"
+                name="[id]"
                 options={{
                     headerShown: false
                 }}

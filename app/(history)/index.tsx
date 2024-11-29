@@ -2,6 +2,8 @@ import { RootState } from '@/redux/store';
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link } from 'expo-router';
 
 type quesString = {
   question: string;
@@ -20,17 +22,23 @@ const QuizHistory: React.FC = () => {
   const { history } = useSelector((state: RootState) => state.history);
 
   const renderItem = ({ item }: { item: HistoryItem }) => (
-    <View style={styles.itemContainer}>
-  
-      <View style={styles.textContainer}>
-        <Text style={styles.attemptedOn}>{item.attemptedOn}</Text>
-        <Text style={styles.score}>Score: {item.score}</Text>
+    <Link href={`/details/${item.id}`}>
+
+      <View style={styles.itemContainer}>
+        <Image
+          source={{ uri: 'https://via.placeholder.com/50' }}
+          style={styles.avatar}
+        />
+        <View style={styles.textContainer}>
+          <Text style={styles.attemptedOn}>Attempted On: {item.attemptedOn}</Text>
+          <Text style={styles.score}>Score: {item.score}</Text>
+        </View>
       </View>
-    </View>
+    </Link >
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Quiz History</Text>
       {history.length === 0 ? (
         <View style={styles.emptyStateContainer}>
@@ -43,7 +51,7 @@ const QuizHistory: React.FC = () => {
           renderItem={renderItem}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -51,14 +59,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E9F7F1',
-    padding: 20,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#2A2A2A', 
+    color: '#2A2A2A',
   },
   itemContainer: {
     flexDirection: 'row',
@@ -71,7 +79,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4, 
+    elevation: 4,
   },
   avatar: {
     width: 50,
@@ -83,12 +91,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   attemptedOn: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 4,
   },
   score: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#555',
   },
   emptyStateContainer: {
