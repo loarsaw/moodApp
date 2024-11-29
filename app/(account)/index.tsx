@@ -195,6 +195,7 @@ const AccountPage: React.FC = () => {
         </View>
 
         <Button title="Save Changes" onPress={handleSubmit(onSubmit)} />
+        <Button title="Log Out" color={"red"} onPress={() => { setItem("accessToken", null) }} />
 
         <Modal visible={isModalVisible} transparent={true} animationType="slide" onRequestClose={() => setIsModalVisible(false)}>
           <View style={styles.modalContainer}>
@@ -222,56 +223,92 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
+    backgroundColor: '#F4F4F9',
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#333',
     marginBottom: 20,
     textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   avatarContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
+    marginTop: 10,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 15,
+    borderWidth: 3,
+    borderColor: '#FFD700', // Vibrant golden border
   },
   editAvatarButton: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 5,
+    backgroundColor: '#FF6347', // Vibrant red color
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    elevation: 3,
+    shadowColor: '#FF6347',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   editAvatarText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   detailContainer: {
-    marginBottom: 20,
+    marginBottom: 25,
+    backgroundColor: '#F1F1F1',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   label: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    fontWeight: '600',
+    color: '#444',
+    marginBottom: 8,
   },
   input: {
-    height: 40,
+    height: 45,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    borderRadius: 8,
+    paddingHorizontal: 12,
     backgroundColor: '#fff',
+    fontSize: 16,
+    color: '#333',
+    shadowColor: '#ddd',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    marginBottom: 10,
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: '#E74C3C',
   },
   value: {
     fontSize: 16,
@@ -281,31 +318,48 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',  // Darken the background when modal appears
   },
   modalContent: {
-    width: '80%',
+    width: '85%',
     backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 15,
+    padding: 25,
     alignItems: 'center',
+    elevation: 10,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
     marginBottom: 20,
+    color: '#333',
   },
   modalButtonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '100%',
-    marginTop: 20,
+    marginTop: 25,
   },
   errorText: {
-    color: 'red',
-    fontSize: 12,
+    color: '#E74C3C',
+    fontSize: 13,
     marginTop: 5,
+    fontStyle: 'italic',
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 30,
+    backgroundColor: '#FF6347', // Vibrant button color
+    marginTop: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
+
 
 export default AccountPage;
