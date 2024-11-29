@@ -14,7 +14,7 @@ const Login = () => {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     const { email, password } = data;
     if (!email || !password) {
-      // Alert.alert('Success', `Logged in with Email: ${email}`);
+      // Alert.alert();
     } else {
       console.log("in")
       const { data } = await axiosInstance.post("/sign-in", { email, password })

@@ -5,6 +5,7 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getItem, setItem } from '@/utils/asyncStorage';
 import { router } from 'expo-router';
+import axiosInstance from '@/utils/axiosInstance';
 
 const schema = yup.object({
   firstName: yup.string().required('First name is required'),
@@ -31,13 +32,11 @@ const AccountPage: React.FC = () => {
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<AccountDetails>({
     resolver: yupResolver(schema),
     defaultValues: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      phone: '+1234567890',
-      quizzesAttempted: 15,
-      dateOfJoining: '2024-01-01',
-      avatar: 'https://via.placeholder.com/100',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      dateOfJoining: '',
     },
   });
 
@@ -50,17 +49,24 @@ const AccountPage: React.FC = () => {
   };
 
   const onSubmit = async (data: AccountDetails) => {
-
+    // axiosInstance.post("/update-user", data)
   };
   useEffect(() => {
     getToken()
   }, [])
 
   async function getToken() {
-    const gotItem = await getItem("token");
+    const gotItem = await getItem("accessToken");
     console.log(gotItem)
     if (gotItem == null) {
       router.push("/signin")
+    } else {
+      console.log("made req")
+      await axiosInstance.get("/get-user", {
+        headers: {
+          Authorization: `Bearer ${gotItem}`
+        }
+      })
     }
   }
 

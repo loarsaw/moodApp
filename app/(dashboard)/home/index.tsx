@@ -1,15 +1,29 @@
-import { Link, router } from 'expo-router';
-import React from 'react';
+import { addSet } from '@/redux/questionSlice/slice';
+import { RootState } from '@/redux/store';
+import axiosInstance from '@/utils/axiosInstance';
+import { router } from 'expo-router';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 const HomePage = () => {
+  const { user: { email } } = useSelector((state: RootState) => state.user)
+  const { questions, alreadyAttempted } = useSelector((state: RootState) => state.questions)
+  const dispatch = useDispatch()
+  const initialize = useCallback(async () => {
+    const { data } = await axiosInstance.post("/get-questions", { already_completed: alreadyAttempted })
+    dispatch(addSet(data.questions))
+    router.push("/(dashboard)/quiz")
+  }, [email, alreadyAttempted])
+
+  console.log(alreadyAttempted)
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Quizzzz APP</Text>
 
       <TouchableOpacity
         style={styles.startButton}
-        onPress={() => { router.push("/quiz"); }}
+        onPress={() => initialize()}
       >
         <Text style={styles.startButtonText}>Start Quiz</Text>
       </TouchableOpacity>

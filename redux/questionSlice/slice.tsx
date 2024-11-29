@@ -1,33 +1,35 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+interface Question {
+  _id: string;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+}
+
+interface QuestionState {
+  questions: Question[];
+  alreadyAttempted: string[]; 
+}
+
+const initialState: QuestionState = {
+  questions: [],
+  alreadyAttempted: [],
+};
 
 export const questionSlice = createSlice({
-    name: 'questions',
-    initialState: {
-        questions: [
-            {
-                question: 'What is the capital of France?',
-                options: ['Paris', 'London', 'Berlin', 'Madrid'],
-                correctAnswer: 'Paris',
-            },
-            {
-                question: 'Which planet is known as the Red Planet?',
-                options: ['Earth', 'Mars', 'Jupiter', 'Venus'],
-                correctAnswer: 'Mars',
-            },
-            {
-                question: 'What is the largest ocean on Earth?',
-                options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'],
-                correctAnswer: 'Pacific',
-            },
-        ]
+  name: 'questions',
+  initialState,
+  reducers: {
+    addSet(state, action: PayloadAction<Question[]>) {
+      state.questions = action.payload;
     },
-    reducers: {
-
-
+    addAttempted(state, action: PayloadAction<string[]>) {
+      state.alreadyAttempted = action.payload;
     },
+  },
 });
 
-// export const { on, off } = questionSlice.actions;
-
+export const { addSet, addAttempted } = questionSlice.actions;
 
 export default questionSlice.reducer;

@@ -1,8 +1,10 @@
 import CountdownTimer from '@/components/ui/Timer';
 import { addToHistory } from '@/redux/historySlice/slice';
+import { addAttempted } from '@/redux/questionSlice/slice';
 import { RootState } from '@/redux/store';
-import { router } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import { StackActions } from '@react-navigation/native';
+import { router, useNavigationContainerRef } from 'expo-router';
+import React, { useCallback, useEffect, useId, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -15,9 +17,9 @@ const HomePage: React.FC = () => {
   const { questions } = useSelector((state: RootState) => state.questions);
   const [secondsLeft, setSecondsLeft] = useState(60);
   const [isRunning, setIsRunning] = useState(true);
+  const rootNavigation = useNavigationContainerRef()
   const currentQuestion = questions[currentQuestionIndex];
   const dispatch = useDispatch();
-
   const handleNext = useCallback(() => {
     if (selectedOption) {
       setAnswers((prev) => ({
@@ -40,26 +42,29 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     if (secondsLeft === 0) {
-      router.push("/(history)");
+      // push to main screen in use cannot complete on time
+      router.push("/");
     }
   }, [secondsLeft]);
 
   const handleSubmit = () => {
     let score = 0;
-    questions.forEach((question, index) => {
+    const attempted = questions.map((data) => data._id)
+    console.log(attempted)
+    questions.forEach((question: any, index) => {
       if (answers[index] === question.correctAnswer) {
         score += 1;
       }
     });
     dispatch(addToHistory({
       attemptedOn: new Date().toDateString(),
-      id: "1",
+      id: new Date().toISOString(),
       questions: questions,
       score: score,
     }));
+    dispatch(addAttempted(attempted))
     router.push("/(history)");
   }
-    // }, [questions, answers])
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

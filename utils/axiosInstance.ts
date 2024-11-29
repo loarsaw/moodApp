@@ -5,6 +5,7 @@ const axiosInstance = axios.create({
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
+    // to skip browser check
     "ngrok-skip-browser-warning": "asklaksl993",
   },
 });
