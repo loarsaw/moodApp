@@ -1,3 +1,7 @@
+import { RootState } from '@/redux/store';
+import { setItem } from '@/utils/asyncStorage';
+import axiosInstance from '@/utils/axiosInstance';
+import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -9,11 +13,12 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 
 const OTPPage: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const inputs = useRef<(TextInput | null)[]>([]);
-
+  const { user: { email } } = useSelector((state: RootState) => state.user)
   const handleInputChange = (text: string, index: number) => {
     const newOtp = [...otp];
     newOtp[index] = text;
@@ -35,10 +40,14 @@ const OTPPage: React.FC = () => {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const enteredOtp = otp.join('');
     if (enteredOtp.length === 6) {
-      Alert.alert('OTP Verified', `Entered OTP: ${enteredOtp}`);
+      const { data } = await axiosInstance.post("/verify-otp", { email: email, token: otp.join("") })
+      console.log(data)
+      await setItem("accessToken", data.token)
+      await setItem("refreshToken", data.refreshToken)
+      router.push("/");
     } else {
       Alert.alert('Error', 'Please enter a 6-digit OTP');
     }

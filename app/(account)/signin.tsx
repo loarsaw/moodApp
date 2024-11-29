@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
+import axiosInstance from '@/utils/axiosInstance';
+import { setItem } from '@/utils/asyncStorage';
 type FormData = {
   email: string;
   password: string;
@@ -9,12 +11,16 @@ type FormData = {
 
 const Login = () => {
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
-  const onSubmit: SubmitHandler<FormData> = (data) => {
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     const { email, password } = data;
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      // Alert.alert('Success', `Logged in with Email: ${email}`);
     } else {
-      Alert.alert('Success', `Logged in with Email: ${email}`);
+      console.log("in")
+      const { data } = await axiosInstance.post("/sign-in", { email, password })
+      await setItem("accessToken", data.accessToken)
+      await setItem("refreshToken", data.refreshToken)
+      router.push("/(dashboard)/home")
     }
   };
 

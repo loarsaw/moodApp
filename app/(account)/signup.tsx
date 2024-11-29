@@ -6,6 +6,8 @@ import { Link } from 'expo-router';
 import backImage from '../../assets/images/background.png';
 import { router } from 'expo-router';
 import axiosInstance from '@/utils/axiosInstance';
+import { useDispatch } from 'react-redux';
+import { addUser } from '@/redux/userSlice/slice';
 
 type FormData = {
   email: string;
@@ -14,6 +16,7 @@ type FormData = {
 };
 
 const Signup = () => {
+  const dispatch = useDispatch()
   const {
     control,
     handleSubmit,
@@ -24,11 +27,21 @@ const Signup = () => {
   const password = watch('password');
 
   const onSubmit = async (data: FormData) => {
-    // await axiosInstance.post("/sign-up", { email: data.email, password: data.password }).then(() => {
-    //   console.log("request sent")
-    // })
+    try {
 
-    router.push("/otp");
+      await axiosInstance.post("/sign-up", { email: data.email, password: data.password }).then(() => {
+        console.log("request sent")
+      })
+      const user = {
+        email: data.email
+      }
+      dispatch(addUser({ user }));
+      router.push("/otp");
+
+    } catch (error) {
+      console.log(error)
+    }
+
   };
 
   return (
