@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, TextInput, Button, Image, Modal, TouchableOpacity, ScrollView,
-  StyleSheet
+  StyleSheet,
+  Alert
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -29,9 +30,7 @@ const schema = z.object({
   dateOfJoining: z
     .string()
     .min(1, { message: 'Date of joining is required' }),
-  avatar: z
-    .string()
-    .url({ message: 'Invalid avatar URL' }),
+
 });
 
 type AccountDetails = z.infer<typeof schema>;
@@ -53,7 +52,6 @@ const AccountPage: React.FC = () => {
       lastName: '',
       email: '',
       dateOfJoining: '',
-      avatar: 'https://via.placeholder.com/100',
     },
   });
 
@@ -61,14 +59,17 @@ const AccountPage: React.FC = () => {
   const [newAvatar, setNewAvatar] = useState('https://via.placeholder.com/100');
 
   const handleSaveAvatar = () => {
-    setValue('avatar', newAvatar);
     setIsModalVisible(false);
   };
 
   const onSubmit = async (data: AccountDetails) => {
+
     try {
-      console.log(data);
-      await axiosInstance.post('/update-user', data);
+      const token = await getItem('accessToken');
+      const fullName = data.firstName + ' ' + data.lastName
+      await axiosInstance.post('/update-user', { fullName, newAvatar }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       fetchUserData();
     } catch (error) {
       console.error('Error updating user:', error);
@@ -86,13 +87,13 @@ const AccountPage: React.FC = () => {
     const { data } = await axiosInstance.get('/get-user', {
       headers: { Authorization: `Bearer ${token}` },
     });
-
+    console.log(data.userData)
     dispatch(addUser({ email: data.userData.email }));
     setValue('email', data.userData.email || '');
-    setValue('avatar', data.userData.avatar || '');
+    // setValue('avatar', data.userData.avatar || '');
     setValue('dateOfJoining', data.userData.createdAt || '');
-    setValue('firstName', data.userData.firstName || '');
-    setValue('lastName', data.userData.lastName || '');
+    // setValue('firstName', data.userData.name.split(" ")[0] || '');
+    // setValue('lastName', data.userData.name.split(" ")[1] || '');
     setNewAvatar(data.userData.avatar || 'https://via.placeholder.com/100');
     const formattedDate = new Date(data.userData.createdAt).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -107,10 +108,6 @@ const AccountPage: React.FC = () => {
 
     dispatch(off());
   }
-
-  useEffect(() => {
-    setValue('avatar', newAvatar);
-  }, [newAvatar]);
 
   useEffect(() => {
     (async () => {
