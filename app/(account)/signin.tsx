@@ -4,6 +4,9 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Link, router } from 'expo-router'
 import axiosInstance from '@/utils/axiosInstance';
 import { setItem } from '@/utils/asyncStorage';
+import { useDispatch, useSelector } from 'react-redux';
+import { off, on } from '@/redux/asyncSlice/slice';
+import { RootState } from '@/redux/store';
 
 type FormData = {
   email: string;
@@ -12,18 +15,26 @@ type FormData = {
 
 const Login = () => {
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
-
+  const dispatch = useDispatch()
+  const { loading } = useSelector((state: RootState) => state.async)
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     const { email, password } = data;
     if (!email || !password) {
       // Alert.alert();
     } else {
-      console.log("in");
-      const { data } = await axiosInstance.post("/sign-in", { email, password });
-      console.log(data);
-      await setItem("accessToken", data.accessToken);
-      await setItem("refreshToken", data.refreshToken);
-      router.push("/(dashboard)/home");
+      try {
+
+        dispatch(on())
+        const { data } = await axiosInstance.post("/sign-in", { email, password });
+        await setItem("accessToken", data.accessToken);
+        await setItem("refreshToken", data.refreshToken);
+        dispatch(off())
+        router.push("/(dashboard)/home");
+      } catch (error) {
+        dispatch(off())
+        Alert.alert("Try Again")
+      }
+
     }
   };
 
@@ -81,7 +92,9 @@ const Login = () => {
         className="w-full h-12 bg-blue-600 rounded-lg justify-center items-center mb-5"
         onPress={handleSubmit(onSubmit)}
       >
-        <Text className="text-white text-lg font-bold">Login</Text>
+        <Text className="text-white text-lg font-bold">
+          {loading ? 'Loading...' : 'Login'}
+        </Text>
       </TouchableOpacity>
 
       <View className="items-center">

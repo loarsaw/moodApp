@@ -1,13 +1,11 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, SafeAreaView, StatusBar } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
-import { Link } from 'expo-router';
-// @ts-ignore
-import backImage from '../../assets/images/background.png';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import axiosInstance from '@/utils/axiosInstance';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '@/redux/userSlice/slice';
+import { RootState } from '@/redux/store';
 
 type FormData = {
   email: string;
@@ -16,7 +14,8 @@ type FormData = {
 };
 
 const Signup = () => {
-  const dispatch = useDispatch()
+  const { loading } = useSelector((state: RootState) => state.async)
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -28,30 +27,23 @@ const Signup = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-
-      await axiosInstance.post("/sign-up", { email: data.email, password: data.password }).then(() => {
-        console.log("request sent")
-      })
-      const user = {
-        email: data.email
-      }
+      await axiosInstance.post('/sign-up', { email: data.email, password: data.password });
+      const user = { email: data.email };
       dispatch(addUser(user));
-      router.push("/otp");
-
+      router.push('/otp');
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-
   };
 
   return (
-    <View style={styles.container}>
-      <Image source={backImage} style={styles.backImage} />
+    <View className="flex-1 relative bg-white">
+      <View className="absolute top-0 w-full h-36 bg-[url('../../assets/images/background.png')] bg-cover" />
 
-      <SafeAreaView style={styles.form}>
-        <Text style={styles.title}>Sign Up</Text>
+      <SafeAreaView className="flex-1 justify-center px-8 mt-16">
+        <Text className="text-3xl font-bold text-black text-center pt-7">Sign Up</Text>
 
-        <View style={styles.inputContainer}>
+        <View className="mt-8">
           <Controller
             control={control}
             name="email"
@@ -63,16 +55,17 @@ const Signup = () => {
               },
             }}
             render={({ field: { onChange, value } }) => (
-              <View style={styles.inputWrapper}>
+              <View className="mb-4">
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
+                  className={`h-14 bg-gray-100 rounded-lg px-3 ${errors.email ? 'border border-error' : ''
+                    }`}
                   placeholder="Email"
                   value={value}
                   onChangeText={onChange}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
-                {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+                {errors.email && <Text className="text-red-500 text-xs mt-1">{errors.email.message}</Text>}
               </View>
             )}
           />
@@ -85,15 +78,16 @@ const Signup = () => {
               minLength: { value: 6, message: 'Password must be at least 6 characters' },
             }}
             render={({ field: { onChange, value } }) => (
-              <View style={styles.inputWrapper}>
+              <View className="mb-4">
                 <TextInput
-                  style={[styles.input, errors.password && styles.inputError]}
+                  className={`h-14 bg-gray-100 rounded-lg px-3 ${errors.password ? 'border border-error' : ''
+                    }`}
                   placeholder="Password"
                   value={value}
                   onChangeText={onChange}
                   secureTextEntry
                 />
-                {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+                {errors.password && <Text className="text-red-500 text-xs mt-1">{errors.password.message}</Text>}
               </View>
             )}
           />
@@ -103,32 +97,32 @@ const Signup = () => {
             name="confirmPassword"
             rules={{
               required: 'Confirm Password is required',
-              validate: (value) =>
-                value === password || 'Passwords must match',
+              validate: (value) => value === password || 'Passwords must match',
             }}
             render={({ field: { onChange, value } }) => (
-              <View style={styles.inputWrapper}>
+              <View className="mb-4">
                 <TextInput
-                  style={[styles.input, errors.confirmPassword && styles.inputError]}
+                  className={`h-14 bg-gray-100 rounded-lg px-3 ${errors.confirmPassword ? 'border border-error' : ''
+                    }`}
                   placeholder="Confirm Password"
                   value={value}
                   onChangeText={onChange}
                   secureTextEntry
                 />
                 {errors.confirmPassword && (
-                  <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+                  <Text className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</Text>
                 )}
               </View>
             )}
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+        <TouchableOpacity className="h-14 bg-[#28a745] rounded-lg flex justify-center items-center mt-10" onPress={handleSubmit(onSubmit)}>
+          <Text className="text-white text-lg font-bold">Sign Up</Text>
         </TouchableOpacity>
 
-        <View style={styles.links}>
-          <Link style={[styles.linkText, { marginTop: 10 }]} href="/">
+        <View className="mt-4 flex items-center">
+          <Link className="text-[#007bff] text-sm underline mt-2" href="/">
             Already have an account? Login
           </Link>
         </View>
@@ -137,77 +131,5 @@ const Signup = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    position: 'relative',
-  },
-  backImage: {
-    width: '100%',
-    height: 140,
-    position: 'absolute',
-    top: 0,
-    resizeMode: 'cover',
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: 'black',
-    alignSelf: 'center',
-    paddingTop: 28,
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 10,
-  },
-  inputWrapper: {
-    marginBottom: 10,
-  },
-  input: {
-    backgroundColor: '#F6F7FB',
-    height: 58,
-    marginBottom: 20,
-    fontSize: 16,
-    borderRadius: 10,
-    padding: 12,
-  },
-  inputError: {
-    borderColor: '#e74c3c',
-  },
-  errorText: {
-    color: '#e74c3c',
-    fontSize: 12,
-    marginTop: 5,
-  },
-  button: {
-    backgroundColor: '#28a745',
-    height: 58,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  buttonText: {
-    fontWeight: 'bold',
-    color: 'white',
-    fontSize: 18,
-  },
-  links: {
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#007bff',
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
-  form: {
-    flex: 1,
-    justifyContent: 'center',
-    marginHorizontal: 30,
-    marginTop: 50,
-  },
-});
 
 export default Signup;
