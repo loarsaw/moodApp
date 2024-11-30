@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Link, router } from 'expo-router'
 import axiosInstance from '@/utils/axiosInstance';
 import { setItem } from '@/utils/asyncStorage';
+
 type FormData = {
   email: string;
   password: string;
@@ -11,29 +12,30 @@ type FormData = {
 
 const Login = () => {
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
+
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     const { email, password } = data;
     if (!email || !password) {
       // Alert.alert();
     } else {
-      console.log("in")
-      const { data } = await axiosInstance.post("/sign-in", { email, password })
-      console.log(data)
-      await setItem("accessToken", data.accessToken)
-      await setItem("refreshToken", data.refreshToken)
-      router.push("/(dashboard)/home")
+      console.log("in");
+      const { data } = await axiosInstance.post("/sign-in", { email, password });
+      console.log(data);
+      await setItem("accessToken", data.accessToken);
+      await setItem("refreshToken", data.refreshToken);
+      router.push("/(dashboard)/home");
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <View style={styles.inputContainer}>
+    <View className="flex-1 justify-center items-center bg-gray-50 p-5">
+      <Text className="text-2xl font-bold mb-5 text-gray-800">Login</Text>
+      <View className="w-full mb-5">
         <Controller
           control={control}
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
-              style={[styles.input, errors.email && { borderColor: 'red' }]}
+              className={`w-full h-12 border border-gray-300 rounded-lg p-2 mb-2 bg-white text-lg ${errors.email ? 'border-red-500' : ''}`}
               placeholder="Email"
               value={value}
               onChangeText={onChange}
@@ -56,7 +58,7 @@ const Login = () => {
           control={control}
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
-              style={[styles.input, errors.password && { borderColor: 'red' }]}
+              className={`w-full h-12 border border-gray-300 rounded-lg p-2 mb-2 bg-white text-lg ${errors.password ? 'border-red-500' : ''}`}
               placeholder="Password"
               value={value}
               onChangeText={onChange}
@@ -74,18 +76,24 @@ const Login = () => {
           }}
         />
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-        <Text style={styles.buttonText}>Login</Text>
+
+      <TouchableOpacity
+        className="w-full h-12 bg-blue-600 rounded-lg justify-center items-center mb-5"
+        onPress={handleSubmit(onSubmit)}
+      >
+        <Text className="text-white text-lg font-bold">Login</Text>
       </TouchableOpacity>
-      <View style={styles.links}>
+
+      <View className="items-center">
         <Text
-          style={styles.linkText}
-          onPress={() => Alert.alert('Navigate', 'Forgot Password Screen')}>
+          className="text-blue-600 text-sm underline"
+          onPress={() => Alert.alert('Navigate', 'Forgot Password Screen')}
+        >
           Forgot Password?
         </Text>
         <Link
           href={"/signup"}
-          style={[styles.linkText, { marginTop: 10 }]}
+          className="text-blue-600 text-sm underline mt-2"
         >
           Don’t have an account? Sign up
         </Link>
@@ -93,63 +101,5 @@ const Login = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#343a40',
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 20,
-  },
-  input: {
-    width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ced4da',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-    fontSize: 16,
-  },
-  button: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  links: {
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#007bff',
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 5,
-  },
-});
 
 export default Login;

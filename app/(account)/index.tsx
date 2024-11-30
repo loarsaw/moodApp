@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, TextInput, Button, Image, Modal,
-  TouchableOpacity, ScrollView,
+  View, Text, TextInput, Button, Image, Modal, TouchableOpacity, ScrollView,
+  StyleSheet
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -125,7 +125,7 @@ const AccountPage: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 justify-center items-center">
         <Text>Loading...</Text>
       </View>
     );
@@ -133,17 +133,17 @@ const AccountPage: React.FC = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Account Details</Text>
+      <View className="bg-white p-5 rounded-xl shadow-lg flex-1">
+        <Text className="text-3xl font-bold text-center mb-6 text-gray-700">Account Details</Text>
 
         {/* Avatar Section */}
-        <View style={styles.avatarContainer}>
-          <Image source={{ uri: newAvatar }} style={styles.avatar} />
+        <View className="items-center mb-6 mt-2">
+          <Image source={{ uri: newAvatar }} className="w-30 h-30 rounded-full border-4 border-yellow-500 mb-4" />
           <TouchableOpacity
-            style={styles.editAvatarButton}
+            className="bg-red-500 px-5 py-2 rounded-full shadow-md"
             onPress={() => setIsModalVisible(true)}
           >
-            <Text style={styles.editAvatarText}>Edit Avatar</Text>
+            <Text className="text-white font-semibold text-lg">Edit Avatar</Text>
           </TouchableOpacity>
         </View>
 
@@ -154,15 +154,15 @@ const AccountPage: React.FC = () => {
           { label: 'Email', name: 'email', keyboardType: 'email-address', editable: false },
           { label: 'Date of Joining', name: 'dateOfJoining', keyboardType: 'default', editable: false },
         ].map(({ label, name, keyboardType, editable }) => (
-          <View style={styles.detailContainer} key={name}>
-            <Text style={styles.label}>{label}</Text>
+          <View className="mb-6 bg-gray-200 p-3 rounded-md border border-gray-300 shadow-sm" key={name}>
+            <Text className="text-lg font-semibold text-gray-600 mb-2">{label}</Text>
             <Controller
               control={control}
               name={name as keyof AccountDetails}
               render={({ field: { value, onChange } }) => (
                 <TextInput
                   editable={editable}
-                  style={[styles.input, errors[name as keyof AccountDetails] && styles.inputError]}
+                  className={`h-12 border rounded-lg p-3 bg-white text-gray-700 ${errors[name as keyof AccountDetails] ? 'border-red-500' : 'border-gray-300'}`}
                   value={value}
                   onChangeText={onChange}
                   keyboardType={keyboardType as any}
@@ -170,16 +170,14 @@ const AccountPage: React.FC = () => {
               )}
             />
             {errors[name as keyof AccountDetails] && (
-              <Text style={styles.errorText}>
-                {errors[name as keyof AccountDetails]?.message}
-              </Text>
+              <Text className="text-red-500 text-xs mt-1">{errors[name as keyof AccountDetails]?.message}</Text>
             )}
           </View>
         ))}
 
         <Button title="Save Changes" onPress={handleSubmit(onSubmit)} />
 
-        <View style={{ marginTop: 10 }}>
+        <View className="mt-4">
           <Button
             title="Log Out"
             color="red"
@@ -197,16 +195,16 @@ const AccountPage: React.FC = () => {
           animationType="slide"
           onRequestClose={() => setIsModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Edit Avatar</Text>
+          <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+            <View className="w-4/5 bg-white rounded-lg p-5 shadow-lg">
+              <Text className="text-xl font-bold text-gray-700 mb-4">Edit Avatar</Text>
               <TextInput
-                style={styles.input}
+                className="h-12 border rounded-lg p-3 bg-white text-gray-700 mb-4"
                 placeholder="Enter Avatar URL"
                 value={newAvatar}
                 onChangeText={setNewAvatar}
               />
-              <View style={styles.modalButtonContainer}>
+              <View className="flex-row justify-around">
                 <Button title="Cancel" onPress={() => setIsModalVisible(false)} />
                 <Button title="Save" onPress={handleSaveAvatar} />
               </View>
@@ -218,168 +216,13 @@ const AccountPage: React.FC = () => {
   );
 };
 
+export default AccountPage;
+
 const styles = StyleSheet.create({
-  skeletonAvatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#E0E0E0',
-    alignSelf: 'center',
-    marginBottom: 30,
-  },
-  skeletonField: {
-    height: 45,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  skeletonButton: {
-    height: 45,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 8,
-    marginTop: 20,
-  },
   scrollContainer: {
     flexGrow: 1,
     marginTop: 10,
     justifyContent: 'center',
     backgroundColor: '#F4F4F9',
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 20,
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-    marginTop: 10,
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 15,
-    borderWidth: 3,
-    borderColor: '#FFD700', // Vibrant golden border
-  },
-  editAvatarButton: {
-    backgroundColor: '#FF6347', // Vibrant red color
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    elevation: 3,
-    shadowColor: '#FF6347',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  editAvatarText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  detailContainer: {
-    marginBottom: 25,
-    backgroundColor: '#F1F1F1',
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#444',
-    marginBottom: 8,
-  },
-  input: {
-    height: 45,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#fff',
-    fontSize: 16,
-    color: '#333',
-    shadowColor: '#ddd',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    marginBottom: 10,
-  },
-  inputError: {
-    borderColor: '#E74C3C',
-  },
-  value: {
-    fontSize: 16,
-    color: '#333',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',  // Darken the background when modal appears
-  },
-  modalContent: {
-    width: '85%',
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 25,
-    alignItems: 'center',
-    elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 20,
-    color: '#333',
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginTop: 25,
-  },
-  errorText: {
-    color: '#E74C3C',
-    fontSize: 13,
-    marginTop: 5,
-    fontStyle: 'italic',
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 30,
-    backgroundColor: '#FF6347', // Vibrant button color
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
-
-
-export default AccountPage;
+})

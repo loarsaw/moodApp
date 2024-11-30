@@ -1,7 +1,7 @@
 import { RootState } from '@/redux/store';
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView } from 'react-native';
+import { View, Text, FlatList, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
 
 type Question = {
@@ -17,95 +17,40 @@ type SolutionProps = {
     questions: Question[];
 };
 
-const SolutionDetails: React.FC<SolutionProps> = ({
+const SolutionDetails: React.FC<SolutionProps> = ({ }) => {
+    const params = useLocalSearchParams();
+    console.log(params);
+    const { questions } = useSelector((state: RootState) => state.questions);
 
-}) => {
-    const params = useLocalSearchParams()
-    console.log(params)
-    const { questions } = useSelector((state: RootState) => state.questions)
-
-    const { history } = useSelector((state: RootState) => state.history)
+    const { history } = useSelector((state: RootState) => state.history);
 
     const renderSolution = ({ item, index }: { item: Question; index: number }) => (
-        <View style={styles.solutionCard}>
-            <Text style={styles.questionText}>
+        <View className="bg-white p-5 rounded-xl mb-4 shadow-md">
+            <Text className="text-lg font-bold text-gray-800 mb-2">
                 Q{index + 1}: {item.question}
             </Text>
-            <Text style={styles.correctAnswerText}>
+            <Text className="text-sm text-green-600">
                 Correct Answer: {item.correctAnswer}
             </Text>
         </View>
     );
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.score}>Score: {history[0].score}</Text>
-                <Text style={styles.attemptedOn}>Attempted On: {history[0].attemptedOn}</Text>
+        <ScrollView className="flex-1 bg-gray-100 px-5">
+            <View className="items-center mb-5 p-5 bg-blue-600 rounded-xl">
+                <Text className="text-lg font-bold text-white mb-2">Score: {history[0].score}</Text>
+                <Text className="text-sm text-gray-300">Attempted On: {history[0].attemptedOn}</Text>
             </View>
 
             <FlatList
                 data={questions}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={renderSolution}
-                contentContainerStyle={styles.listContainer}
+                className="mt-5"
                 scrollEnabled={false}
             />
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        padding: 20,
-        backgroundColor: '#F5F5F5',
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 20,
-        padding: 15,
-        backgroundColor: '#1A73E8',
-        borderRadius: 10,
-    },
-    username: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
-    score: {
-        fontSize: 18,
-        color: '#fff',
-        marginVertical: 5,
-    },
-    attemptedOn: {
-        fontSize: 16,
-        color: '#E0E0E0',
-    },
-    listContainer: {
-        marginTop: 20,
-    },
-    solutionCard: {
-        backgroundColor: '#ffffff',
-        padding: 15,
-        borderRadius: 10,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-    },
-    questionText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 5,
-    },
-    correctAnswerText: {
-        fontSize: 14,
-        color: '#4CAF50',
-    },
-});
 
 export default SolutionDetails;

@@ -9,7 +9,7 @@ import { Provider as StoreProvider } from 'react-redux'
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { store } from '@/redux/store';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-
+import "../global.css"
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {

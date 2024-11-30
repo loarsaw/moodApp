@@ -2,10 +2,9 @@ import CountdownTimer from '@/components/ui/Timer';
 import { addToHistory } from '@/redux/historySlice/slice';
 import { addAttempted } from '@/redux/questionSlice/slice';
 import { RootState } from '@/redux/store';
-import { StackActions } from '@react-navigation/native';
-import { router, useNavigationContainerRef } from 'expo-router';
-import React, { useCallback, useEffect, useId, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated, ScrollView } from 'react-native';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Alert, ScrollView, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 type Answers = Record<number, string>;
@@ -15,12 +14,11 @@ const HomePage: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [answers, setAnswers] = useState<Answers>({});
   const { questions } = useSelector((state: RootState) => state.questions);
-  const [secondsLeft, setSecondsLeft] = useState(60);
-  const [isOver, setIsOver] = useState(false)
-  const [isRunning, setIsRunning] = useState(true);
-  const rootNavigation = useNavigationContainerRef()
-  const currentQuestion = questions[currentQuestionIndex];
+  const [isOver, setIsOver] = useState(false);
   const dispatch = useDispatch();
+
+  const currentQuestion = questions[currentQuestionIndex];
+
   const handleNext = useCallback(() => {
     if (selectedOption) {
       setAnswers((prev) => ({
@@ -43,83 +41,91 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     if (isOver) {
-      // push to main screen in use cannot complete on time
-      router.push("/");
+      router.push('/');
     }
   }, [isOver]);
 
   const handleSubmit = () => {
     let score = 0;
-    const attempted = questions.map((data) => data._id)
-    console.log(attempted)
+    const attempted = questions.map((data) => data._id);
+
     questions.forEach((question: any, index) => {
       if (answers[index] === question.correctAnswer) {
         score += 1;
       }
     });
-    dispatch(addToHistory({
-      attemptedOn: new Date().toDateString(),
-      id: new Date().toISOString(),
-      questions: questions,
-      score: score,
-    }));
-    dispatch(addAttempted(attempted))
-    router.push("/(history)");
-  }
 
-  console.log(questions)
+    dispatch(
+      addToHistory({
+        attemptedOn: new Date().toDateString(),
+        id: new Date().toISOString(),
+        questions: questions,
+        score: score,
+      })
+    );
+
+    dispatch(addAttempted(attempted));
+    router.push('/(history)');
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Countdown Timer */}
-      {/* Timer will cause the re rendering of the entire questions sections on every second
-      possible solution
-      1. useMemo or React.memo for
-      2. ReStructure
-      */}
+      {/* 
+    We have pushed the state down to Countdown timer 
+    */}
       <CountdownTimer isOver={isOver} setIsOver={setIsOver} />
 
       {/* Current Question */}
-      <Text style={styles.question}>{currentQuestion.question}</Text>
+      <Text className="text-2xl font-bold text-blue-600 mb-8 text-center px-5 leading-8">
+        {currentQuestion.question}
+      </Text>
 
       {/* Options */}
-      <View style={styles.optionsContainer}>
+      <View className="w-full mb-10">
         {currentQuestion.options.map((option, index) => (
           <TouchableOpacity
             key={index}
-            style={[
-              styles.optionButton,
-              selectedOption === option && styles.selectedOption,
-            ]}
+            className={`bg-white border border-gray-300 rounded-xl py-4 mb-4 items-center shadow-sm ${selectedOption === option ? 'bg-green-600 border-green-700' : ''
+              }`}
             onPress={() => setSelectedOption(option)}
           >
-            <Text style={styles.optionText}>{option}</Text>
+            <Text className="text-lg text-gray-800">{option}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Navigation Buttons */}
-      <View style={styles.navigationContainer}>
+      <View className="flex-row justify-between w-full px-5">
         <TouchableOpacity
-          style={[styles.navButton, currentQuestionIndex === 0 && styles.disabledButton]}
+          className={`bg-orange-600 py-3 px-8 rounded-xl justify-center items-center ${currentQuestionIndex === 0 ? 'bg-gray-400' : ''
+            }`}
           onPress={handleBack}
           disabled={currentQuestionIndex === 0}
         >
-          <Text style={styles.navButtonText}>Back</Text>
+          <Text className="text-white text-lg font-bold">Back</Text>
         </TouchableOpacity>
 
         {currentQuestionIndex === questions.length - 1 ? (
-          <TouchableOpacity style={styles.navButton} onPress={handleSubmit}>
-            <Text style={styles.navButtonText}>Submit</Text>
+          <TouchableOpacity
+            className="bg-orange-600 py-3 px-8 rounded-xl justify-center items-center"
+            onPress={handleSubmit}
+          >
+            <Text className="text-white text-lg font-bold">Submit</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.navButton} onPress={handleNext}>
-            <Text style={styles.navButtonText}>Next</Text>
+          <TouchableOpacity
+            className="bg-orange-600 py-3 px-8 rounded-xl justify-center items-center"
+            onPress={handleNext}
+          >
+            <Text className="text-white text-lg font-bold">Next</Text>
           </TouchableOpacity>
         )}
       </View>
     </ScrollView>
   );
 };
+
+export default HomePage;
 
 const styles = StyleSheet.create({
   container: {
@@ -128,69 +134,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#E9F7F1',
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 5,
-    color: '#2A2A2A',
-  },
-  question: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#1A73E8',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-    lineHeight: 32,
-  },
-  optionsContainer: {
-    width: '100%',
-    marginBottom: 40,
-  },
-  optionButton: {
-    backgroundColor: '#ffffff',
-    borderColor: '#DDD',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 15,
-    marginBottom: 15,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  selectedOption: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#388E3C',
-  },
-  optionText: {
-    fontSize: 18,
-    color: '#333',
-  },
-  navigationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 20,
-  },
-  navButton: {
-    backgroundColor: '#FF5722',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  disabledButton: {
-    backgroundColor: '#BDBDBD',
-  },
-  navButtonText: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
-
-export default HomePage;
+  }
+})

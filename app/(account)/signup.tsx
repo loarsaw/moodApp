@@ -35,7 +35,7 @@ const Signup = () => {
       const user = {
         email: data.email
       }
-      dispatch(addUser({ user }));
+      dispatch(addUser(user));
       router.push("/otp");
 
     } catch (error) {

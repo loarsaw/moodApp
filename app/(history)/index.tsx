@@ -1,6 +1,6 @@
 import { RootState } from '@/redux/store';
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import { View, Text, Image, FlatList } from 'react-native';
 import { useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
@@ -23,26 +23,27 @@ const QuizHistory: React.FC = () => {
 
   const renderItem = ({ item }: { item: HistoryItem }) => (
     <Link href={`/details/${item.id}`}>
-
-      <View style={styles.itemContainer}>
+      <View className="flex-row items-center bg-white rounded-2xl p-5 mb-4 shadow-lg mt-3">
         <Image
           source={{ uri: 'https://via.placeholder.com/50' }}
-          style={styles.avatar}
+          className="w-12 h-12 rounded-full mr-4"
         />
-        <View style={styles.textContainer}>
-          <Text style={styles.attemptedOn}>Attempted On: {item.attemptedOn}</Text>
-          <Text style={styles.score}>Score: {item.score}</Text>
+        <View className="flex-1">
+          <Text className="text-lg font-bold text-gray-800 mb-1">
+            Attempted On: {item.attemptedOn}
+          </Text>
+          <Text className="text-sm text-gray-600">Score: {item.score}</Text>
         </View>
       </View>
-    </Link >
+    </Link>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Quiz History</Text>
+    <SafeAreaView className="flex-1 bg-emerald-50 px-5">
+      <Text className="text-3xl font-bold text-center text-gray-800 mb-5">Quiz History</Text>
       {history.length === 0 ? (
-        <View style={styles.emptyStateContainer}>
-          <Text style={styles.emptyStateText}>No Attempted Quiz</Text>
+        <View className="flex-1 justify-center items-center mt-10">
+          <Text className="text-xl text-gray-500">No Attempted Quiz</Text>
         </View>
       ) : (
         <FlatList
@@ -54,62 +55,5 @@ const QuizHistory: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E9F7F1',
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#2A2A2A',
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    marginTop: 10
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  attemptedOn: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  score: {
-    fontSize: 14,
-    color: '#555',
-  },
-  emptyStateContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 50,
-  },
-  emptyStateText: {
-    fontSize: 18,
-    color: '#888',
-  },
-});
 
 export default QuizHistory;
