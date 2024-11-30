@@ -4,8 +4,8 @@ import {
   TouchableOpacity, ScrollView,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { getItem, setItem } from '@/utils/asyncStorage';
 import { router } from 'expo-router';
 import axiosInstance from '@/utils/axiosInstance';
@@ -14,35 +14,27 @@ import { addUser } from '@/redux/userSlice/slice';
 import { RootState } from '@/redux/store';
 import { off, on } from '@/redux/asyncSlice/slice';
 
-const schema = yup.object().shape({
-  firstName: yup
+const schema = z.object({
+  firstName: z
     .string()
-    .required('First name is required')
-    .matches(/^[A-Za-z]+$/, 'First name must only contain letters'),
-  lastName: yup
+    .min(1, { message: 'First name is required' })
+    .regex(/^[A-Za-z]+$/, { message: 'First name must only contain letters' }),
+  lastName: z
     .string()
-    .required('Last name is required')
-    .matches(/^[A-Za-z]+$/, 'Last name must only contain letters'),
-  email: yup
+    .min(1, { message: 'Last name is required' })
+    .regex(/^[A-Za-z]+$/, { message: 'Last name must only contain letters' }),
+  email: z
     .string()
-    .email('Invalid email address')
-    .required('Email is required'),
-
-  dateOfJoining: yup
-    .string().required(),
-  avatar: yup
+    .email({ message: 'Invalid email address' }),
+  dateOfJoining: z
     .string()
-    .url('Invalid avatar URL')
-    .required('Avatar URL is required'),
+    .min(1, { message: 'Date of joining is required' }),
+  avatar: z
+    .string()
+    .url({ message: 'Invalid avatar URL' }),
 });
 
-type AccountDetails = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  dateOfJoining: string;
-  avatar: string;
-};
+type AccountDetails = z.infer<typeof schema>;
 
 const AccountPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -55,7 +47,7 @@ const AccountPage: React.FC = () => {
     formState: { errors },
     setValue,
   } = useForm<AccountDetails>({
-    resolver: yupResolver(schema),
+    resolver: zodResolver(schema),
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -75,9 +67,9 @@ const AccountPage: React.FC = () => {
 
   const onSubmit = async (data: AccountDetails) => {
     try {
-      console.log(data)
+      console.log(data);
       await axiosInstance.post('/update-user', data);
-      fetchUserData()
+      fetchUserData();
     } catch (error) {
       console.error('Error updating user:', error);
     }
@@ -101,38 +93,35 @@ const AccountPage: React.FC = () => {
     setValue('dateOfJoining', data.userData.createdAt || '');
     setValue('firstName', data.userData.firstName || '');
     setValue('lastName', data.userData.lastName || '');
-    setNewAvatar(data.userData.avatar || "https://via.placeholder.com/100")
-    const formattedDate = new Date(data.userData.createdAt).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    setNewAvatar(data.userData.avatar || 'https://via.placeholder.com/100');
+    const formattedDate = new Date(data.userData.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       hour12: true,
-    })
+    });
     setValue('dateOfJoining', formattedDate);
 
     dispatch(off());
   }
 
   useEffect(() => {
-    setValue('avatar', newAvatar)
-  }, [newAvatar])
+    setValue('avatar', newAvatar);
+  }, [newAvatar]);
 
   useEffect(() => {
     (async () => {
       try {
-
-        fetchUserData()
-
+        fetchUserData();
       } catch (error) {
         console.error('Error fetching user data:', error);
         dispatch(off());
       }
     })();
   }, [dispatch]);
-
 
   if (loading) {
     return (
@@ -157,7 +146,8 @@ const AccountPage: React.FC = () => {
             <Text style={styles.editAvatarText}>Edit Avatar</Text>
           </TouchableOpacity>
         </View>
-        {/* Disabled the fields such as mail and date of joining */}
+
+        {/* Disabled fields such as email and date of joining */}
         {[
           { label: 'First Name', name: 'firstName', keyboardType: 'default', editable: true },
           { label: 'Last Name', name: 'lastName', keyboardType: 'default', editable: true },
@@ -227,7 +217,6 @@ const AccountPage: React.FC = () => {
     </ScrollView>
   );
 };
-
 
 const styles = StyleSheet.create({
   skeletonAvatar: {
