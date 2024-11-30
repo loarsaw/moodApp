@@ -96,8 +96,12 @@ const AccountPage: React.FC = () => {
     });
 
     dispatch(addUser({ email: data.userData.email }));
-    setValue('email', data.userData.email);
-
+    setValue('email', data.userData.email || '');
+    setValue('avatar', data.userData.avatar || '');
+    setValue('dateOfJoining', data.userData.createdAt || '');
+    setValue('firstName', data.userData.firstName || '');
+    setValue('lastName', data.userData.lastName || '');
+    setNewAvatar(data.userData.avatar || "https://via.placeholder.com/100")
     const formattedDate = new Date(data.userData.createdAt).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -113,6 +117,10 @@ const AccountPage: React.FC = () => {
   }
 
   useEffect(() => {
+    setValue('avatar', newAvatar)
+  }, [newAvatar])
+
+  useEffect(() => {
     (async () => {
       try {
 
@@ -124,6 +132,7 @@ const AccountPage: React.FC = () => {
       }
     })();
   }, [dispatch]);
+
 
   if (loading) {
     return (
@@ -243,6 +252,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    marginTop: 10,
     justifyContent: 'center',
     backgroundColor: '#F4F4F9',
   },
