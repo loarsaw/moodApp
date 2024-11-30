@@ -16,6 +16,7 @@ const HomePage: React.FC = () => {
   const [answers, setAnswers] = useState<Answers>({});
   const { questions } = useSelector((state: RootState) => state.questions);
   const [secondsLeft, setSecondsLeft] = useState(60);
+  const [isOver, setIsOver] = useState(false)
   const [isRunning, setIsRunning] = useState(true);
   const rootNavigation = useNavigationContainerRef()
   const currentQuestion = questions[currentQuestionIndex];
@@ -41,11 +42,11 @@ const HomePage: React.FC = () => {
   }, [currentQuestionIndex, selectedOption, answers]);
 
   useEffect(() => {
-    if (secondsLeft === 0) {
+    if (isOver) {
       // push to main screen in use cannot complete on time
       router.push("/");
     }
-  }, [secondsLeft]);
+  }, [isOver]);
 
   const handleSubmit = () => {
     let score = 0;
@@ -66,6 +67,7 @@ const HomePage: React.FC = () => {
     router.push("/(history)");
   }
 
+  console.log(questions)
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Countdown Timer */}
@@ -74,7 +76,7 @@ const HomePage: React.FC = () => {
       1. useMemo or React.memo for
       2. ReStructure
       */}
-      <CountdownTimer isRunning={isRunning} secondsLeft={secondsLeft} setSecondsLeft={setSecondsLeft} />
+      <CountdownTimer isOver={isOver} setIsOver={setIsOver} />
 
       {/* Current Question */}
       <Text style={styles.question}>{currentQuestion.question}</Text>

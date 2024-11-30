@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 
-const CountdownTimer = ({ secondsLeft, setSecondsLeft, isRunning }: { secondsLeft: number, setSecondsLeft: React.Dispatch<React.SetStateAction<number>>, isRunning: boolean }) => {
-
+const CountdownTimer = ({ isOver, setIsOver }: { isOver: boolean, setIsOver: React.Dispatch<React.SetStateAction<boolean>> }) => {
+    const [secondsLeft, setSecondsLeft] = useState(60);
+    const [isRunning, setIsRunning] = useState(true);
 
     useEffect(() => {
         let interval: any = null;
@@ -13,6 +14,7 @@ const CountdownTimer = ({ secondsLeft, setSecondsLeft, isRunning }: { secondsLef
             }, 1000);
         } else if (secondsLeft === 0) {
             clearInterval(interval);
+            setIsOver(true)
         }
 
         return () => clearInterval(interval);
