@@ -1,23 +1,29 @@
+import { off, on } from '@/redux/asyncSlice/slice';
 import { addSet } from '@/redux/questionSlice/slice';
 import { RootState } from '@/redux/store';
 import axiosInstance from '@/utils/axiosInstance';
 import { router } from 'expo-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { buttonVariantByState } from '../../../utils/cva'; // Import the helper function
 
 const HomePage = () => {
   const {
     user: { email },
   } = useSelector((state: RootState) => state.user);
   const { alreadyAttempted } = useSelector((state: RootState) => state.questions);
+  const { loading } = useSelector((state: RootState) => state.async)
   const dispatch = useDispatch();
 
+
   const initialize = useCallback(async () => {
+    dispatch(on());
     const { data } = await axiosInstance.post('/get-questions', {
       already_completed: alreadyAttempted,
     });
     dispatch(addSet(data.questions));
+    dispatch(off());
     router.push('/(dashboard)/quiz');
   }, [email, alreadyAttempted]);
 
@@ -27,10 +33,13 @@ const HomePage = () => {
         Quizzzz APP
       </Text>
       <TouchableOpacity
-        className="bg-green-600 px-12 py-4 rounded-full shadow-md shadow-black"
+        className={buttonVariantByState(loading)}
         onPress={() => initialize()}
+        disabled={loading}
       >
-        <Text className="text-white text-lg font-bold uppercase">Start Quiz</Text>
+        <Text className="text-white text-lg font-bold uppercase">
+          {loading ? 'Loading...' : 'Start Quiz'}
+        </Text>
       </TouchableOpacity>
     </View>
   );

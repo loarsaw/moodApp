@@ -4,6 +4,8 @@ import { View, Text, Image, FlatList } from 'react-native';
 import { useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
+import { backgroundVariantByScore } from '../../utils/cva';
+import clsx from 'clsx';
 
 type quesString = {
   question: string;
@@ -21,22 +23,28 @@ type HistoryItem = {
 const QuizHistory: React.FC = () => {
   const { history } = useSelector((state: RootState) => state.history);
 
-  const renderItem = ({ item }: { item: HistoryItem }) => (
-    <Link href={`/details/${item.id}`}>
-      <View className="flex-row items-center bg-white rounded-2xl p-5 mb-4 shadow-lg mt-3">
-        <Image
-          source={{ uri: 'https://via.placeholder.com/50' }}
-          className="w-12 h-12 rounded-full mr-4"
-        />
-        <View className="flex-1">
-          <Text className="text-lg font-bold text-gray-800 mb-1">
-            Attempted On: {item.attemptedOn}
-          </Text>
-          <Text className="text-sm text-gray-600">Score: {item.score}</Text>
+  const renderItem = ({ item }: { item: HistoryItem }) => {
+    console.log(item.score)
+    return (
+      <Link href={`/details/${item.id}`}>
+        <View className={backgroundVariantByScore(4)}>
+          <Image
+            source={{ uri: 'https://via.placeholder.com/50' }}
+            className="w-12 h-12 rounded-full mr-4"
+          />
+          <View className="flex-1">
+            <Text className="text-lg font-bold text-gray-800 mb-1">
+              Attempted On: {item.attemptedOn}
+            </Text>
+            <View className={clsx(item.score > 0 ? "bg-green-300" : "bg-white", "w-full p-4")}>
+
+              <Text className="text-sm text-gray-600">Score: {item.score}</Text>
+            </View>
+          </View>
         </View>
-      </View>
-    </Link>
-  );
+      </Link>
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-emerald-50 px-5">
