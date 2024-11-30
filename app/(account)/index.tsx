@@ -1,47 +1,72 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Image, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View, Text, StyleSheet, TextInput, Button, Image, Modal,
+  TouchableOpacity, ScrollView,
+} from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getItem, setItem } from '@/utils/asyncStorage';
 import { router } from 'expo-router';
 import axiosInstance from '@/utils/axiosInstance';
+import { useDispatch, useSelector } from 'react-redux';
+import { addUser } from '@/redux/userSlice/slice';
+import { RootState } from '@/redux/store';
+import { off, on } from '@/redux/asyncSlice/slice';
 
-const schema = yup.object({
-  firstName: yup.string().required('First name is required'),
-  lastName: yup.string().required('Last name is required'),
-  email: yup.string().email('Invalid email address').required('Email is required'),
-  phone: yup.string().matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number').required('Phone number is required'),
-  quizzesAttempted: yup.number().min(0, 'Quizzes attempted must be a positive number').required('This field is required'),
-  dateOfJoining: yup.string().required('Date of joining is required'),
-  avatar: yup.string().url('Invalid avatar URL').required('Avatar URL is required'),
-}).required();
+const schema = yup.object().shape({
+  firstName: yup
+    .string()
+    .required('First name is required')
+    .matches(/^[A-Za-z]+$/, 'First name must only contain letters'),
+  lastName: yup
+    .string()
+    .required('Last name is required')
+    .matches(/^[A-Za-z]+$/, 'Last name must only contain letters'),
+  email: yup
+    .string()
+    .email('Invalid email address')
+    .required('Email is required'),
+
+  dateOfJoining: yup
+    .string().required(),
+  avatar: yup
+    .string()
+    .url('Invalid avatar URL')
+    .required('Avatar URL is required'),
+});
 
 type AccountDetails = {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
-  quizzesAttempted: number;
   dateOfJoining: string;
   avatar: string;
 };
 
 const AccountPage: React.FC = () => {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.user);
+  const { loading } = useSelector((state: RootState) => state.async);
 
-  const { control, handleSubmit, formState: { errors }, setValue } = useForm<AccountDetails>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<AccountDetails>({
     resolver: yupResolver(schema),
     defaultValues: {
       firstName: '',
       lastName: '',
       email: '',
-      phone: '',
       dateOfJoining: '',
+      avatar: 'https://via.placeholder.com/100',
     },
   });
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [newAvatar, setNewAvatar] = useState<string>('https://via.placeholder.com/100');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newAvatar, setNewAvatar] = useState('https://via.placeholder.com/100');
 
   const handleSaveAvatar = () => {
     setValue('avatar', newAvatar);
@@ -49,25 +74,63 @@ const AccountPage: React.FC = () => {
   };
 
   const onSubmit = async (data: AccountDetails) => {
-    // axiosInstance.post("/update-user", data)
-  };
-  useEffect(() => {
-    getToken()
-  }, [])
-
-  async function getToken() {
-    const gotItem = await getItem("accessToken");
-    console.log(gotItem)
-    if (gotItem == null) {
-      router.push("/signin")
-    } else {
-      console.log("made req")
-      await axiosInstance.get("/get-user", {
-        headers: {
-          Authorization: `Bearer ${gotItem}`
-        }
-      })
+    try {
+      console.log(data)
+      await axiosInstance.post('/update-user', data);
+      fetchUserData()
+    } catch (error) {
+      console.error('Error updating user:', error);
     }
+  };
+
+  async function fetchUserData() {
+    dispatch(on());
+    const token = await getItem('accessToken');
+    if (!token) {
+      dispatch(off());
+      router.push('/signin');
+      return;
+    }
+    const { data } = await axiosInstance.get('/get-user', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    dispatch(addUser({ email: data.userData.email }));
+    setValue('email', data.userData.email);
+
+    const formattedDate = new Date(data.userData.createdAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    })
+    setValue('dateOfJoining', formattedDate);
+
+    dispatch(off());
+  }
+
+  useEffect(() => {
+    (async () => {
+      try {
+
+        fetchUserData()
+
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        dispatch(off());
+      }
+    })();
+  }, [dispatch]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   return (
@@ -75,129 +138,66 @@ const AccountPage: React.FC = () => {
       <View style={styles.container}>
         <Text style={styles.title}>Account Details</Text>
 
+        {/* Avatar Section */}
         <View style={styles.avatarContainer}>
           <Image source={{ uri: newAvatar }} style={styles.avatar} />
-          <TouchableOpacity style={styles.editAvatarButton} onPress={() => setIsModalVisible(true)}>
+          <TouchableOpacity
+            style={styles.editAvatarButton}
+            onPress={() => setIsModalVisible(true)}
+          >
             <Text style={styles.editAvatarText}>Edit Avatar</Text>
           </TouchableOpacity>
         </View>
-
-        {/* First Name */}
-        <View style={styles.detailContainer}>
-          <Text style={styles.label}>First Name:</Text>
-          <Controller
-            control={control}
-            name="firstName"
-            render={({ field: { value, onChange } }) => (
-              <>
+        {/* Disabled the fields such as mail and date of joining */}
+        {[
+          { label: 'First Name', name: 'firstName', keyboardType: 'default', editable: true },
+          { label: 'Last Name', name: 'lastName', keyboardType: 'default', editable: true },
+          { label: 'Email', name: 'email', keyboardType: 'email-address', editable: false },
+          { label: 'Date of Joining', name: 'dateOfJoining', keyboardType: 'default', editable: false },
+        ].map(({ label, name, keyboardType, editable }) => (
+          <View style={styles.detailContainer} key={name}>
+            <Text style={styles.label}>{label}</Text>
+            <Controller
+              control={control}
+              name={name as keyof AccountDetails}
+              render={({ field: { value, onChange } }) => (
                 <TextInput
-                  style={[styles.input, errors.firstName && styles.inputError]} // Apply error style if invalid
+                  editable={editable}
+                  style={[styles.input, errors[name as keyof AccountDetails] && styles.inputError]}
                   value={value}
                   onChangeText={onChange}
+                  keyboardType={keyboardType as any}
                 />
-                {errors.firstName && <Text style={styles.errorText}>{errors.firstName.message}</Text>}
-              </>
+              )}
+            />
+            {errors[name as keyof AccountDetails] && (
+              <Text style={styles.errorText}>
+                {errors[name as keyof AccountDetails]?.message}
+              </Text>
             )}
-          />
-        </View>
-
-        {/* Last Name */}
-        <View style={styles.detailContainer}>
-          <Text style={styles.label}>Last Name:</Text>
-          <Controller
-            control={control}
-            name="lastName"
-            render={({ field: { value, onChange } }) => (
-              <>
-                <TextInput
-                  style={[styles.input, errors.lastName && styles.inputError]}
-                  value={value}
-                  onChangeText={onChange}
-                />
-                {errors.lastName && <Text style={styles.errorText}>{errors.lastName.message}</Text>}
-              </>
-            )}
-          />
-        </View>
-
-        {/* Email */}
-        <View style={styles.detailContainer}>
-          <Text style={styles.label}>Email:</Text>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { value, onChange } }) => (
-              <>
-                <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
-                  value={value}
-                  onChangeText={onChange}
-                />
-                {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
-              </>
-            )}
-          />
-        </View>
-
-        <View style={styles.detailContainer}>
-          <Text style={styles.label}>Phone Number:</Text>
-          <Controller
-            control={control}
-            name="phone"
-            render={({ field: { value, onChange } }) => (
-              <>
-                <TextInput
-                  style={[styles.input, errors.phone && styles.inputError]}
-                  value={value}
-                  onChangeText={onChange}
-                />
-                {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
-              </>
-            )}
-          />
-        </View>
-
-        <View style={styles.detailContainer}>
-          <Text style={styles.label}>Total Quizzes Attempted:</Text>
-          <Controller
-            control={control}
-            name="quizzesAttempted"
-            render={({ field: { value, onChange } }) => (
-              <>
-                <TextInput
-                  style={[styles.input, errors.quizzesAttempted && styles.inputError]}
-                  keyboardType="numeric"
-                  value={value?.toString()}
-                  onChangeText={(text) => onChange(Number(text))}
-                />
-                {errors.quizzesAttempted && <Text style={styles.errorText}>{errors.quizzesAttempted.message}</Text>}
-              </>
-            )}
-          />
-        </View>
-
-        <View style={styles.detailContainer}>
-          <Text style={styles.label}>Date of Joining:</Text>
-          <Controller
-            control={control}
-            name="dateOfJoining"
-            render={({ field: { value, onChange } }) => (
-              <>
-                <TextInput
-                  style={[styles.input, errors.dateOfJoining && styles.inputError]}
-                  value={value}
-                  onChangeText={onChange}
-                />
-                {errors.dateOfJoining && <Text style={styles.errorText}>{errors.dateOfJoining.message}</Text>}
-              </>
-            )}
-          />
-        </View>
+          </View>
+        ))}
 
         <Button title="Save Changes" onPress={handleSubmit(onSubmit)} />
-        <Button title="Log Out" color={"red"} onPress={() => { setItem("accessToken", null) }} />
 
-        <Modal visible={isModalVisible} transparent={true} animationType="slide" onRequestClose={() => setIsModalVisible(false)}>
+        <View style={{ marginTop: 10 }}>
+          <Button
+            title="Log Out"
+            color="red"
+            onPress={() => {
+              setItem('accessToken', null);
+              router.push('/signin');
+            }}
+          />
+        </View>
+
+        {/* Avatar Modal */}
+        <Modal
+          visible={isModalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setIsModalVisible(false)}
+        >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Edit Avatar</Text>
@@ -219,7 +219,28 @@ const AccountPage: React.FC = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
+  skeletonAvatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#E0E0E0',
+    alignSelf: 'center',
+    marginBottom: 30,
+  },
+  skeletonField: {
+    height: 45,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  skeletonButton: {
+    height: 45,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 8,
+    marginTop: 20,
+  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',

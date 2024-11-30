@@ -18,6 +18,7 @@ const Login = () => {
     } else {
       console.log("in")
       const { data } = await axiosInstance.post("/sign-in", { email, password })
+      console.log(data)
       await setItem("accessToken", data.accessToken)
       await setItem("refreshToken", data.refreshToken)
       router.push("/(dashboard)/home")
