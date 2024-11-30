@@ -90,10 +90,9 @@ const AccountPage: React.FC = () => {
     console.log(data.userData)
     dispatch(addUser({ email: data.userData.email }));
     setValue('email', data.userData.email || '');
-    // setValue('avatar', data.userData.avatar || '');
     setValue('dateOfJoining', data.userData.createdAt || '');
-    // setValue('firstName', data.userData.name.split(" ")[0] || '');
-    // setValue('lastName', data.userData.name.split(" ")[1] || '');
+    setValue('firstName', data.userData.name.split(" ")[0] || '');
+    setValue('lastName', data.userData.name.split(" ")[1] || '');
     setNewAvatar(data.userData.avatar || 'https://via.placeholder.com/100');
     const formattedDate = new Date(data.userData.createdAt).toLocaleDateString('en-US', {
       year: 'numeric',
